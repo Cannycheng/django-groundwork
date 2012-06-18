@@ -9,6 +9,7 @@ class Command(BaseCommand):
         "Usage : manage.py groundwork <app> <model>"
 
         PROJECT_ROOT = os.getcwd() 
+        PROJECT_NAME = os.path.split(os.getcwd())[-1]
         TEMPLATE_DIR = os.path.join ( PROJECT_ROOT , 'templates')
 
 
@@ -33,7 +34,7 @@ class Command(BaseCommand):
             f.close()
             
             # append to root urlconf
-            f = open( os.path.join (PROJECT_ROOT , 'urls.py') , 'a')
+            f = open( os.path.join (PROJECT_NAME, 'urls.py') , 'a')
             f.write( "\nurlpatterns += patterns ('',\n (r'^%(app)s/', include('%(app)s.urls')),\n)\n" % {'app': app } )
             f.close()
 
@@ -97,12 +98,14 @@ class Command(BaseCommand):
                 f = open(os.path.join( TEMPLATE_DIR, app, 'view_%s.html' % (model_instance._meta.object_name.lower()) ) , 'w')
                 f.write( TEMPLATES_VIEW  %  { 'modelClass' : model_instance._meta.object_name,  'model' : model_instance._meta.object_name.lower()} )
                 f.close()
-
-            # settings
-            f = open(os.path.join(PROJECT_ROOT, 'settings.py'), 'a')
-            f.write( "\nimport os\nTEMPLATE_DIRS += (os.path.join(  os.path.dirname(__file__), 'templates') ,)\n")
-            f.close()
                 
+            # settings
+            print "Auto add templates to TEMPLATE_DIRS in settings.py? [Y/N](you can manually add it)"
+            yn = raw_input()
+            if yn.lower() == 'y':
+                f = open(os.path.join(PROJECT_NAME, 'settings.py'), 'a')
+                f.write( "\nimport os\nTEMPLATE_DIRS += (os.path.join( os.path.dirname(__file__), 'templates') ,)\n")
+                f.close()
         except:
             print "Usage : manage.py groundwork <app> <model>"
 
